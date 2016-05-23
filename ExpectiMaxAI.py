@@ -38,8 +38,8 @@ class MaxNode:
         return value
 
     def branch(self):
-        succesorValues=[]
         for i in xrange(4):
+            #Generate Chance Node for all possible moves
             succ = ChanceNode(self.game, i+1, depth= self.depth)
             self.successors.append(succ)
 
@@ -71,10 +71,6 @@ class ChanceNode:
         self.game.move(direction)
         self.branchNodes = []
         self.value = self.getChanceNodeValue()
-        print self
-
-        for maxNode in self.branchNodes:
-            print maxNode
 
 
     # Generate successors
@@ -122,8 +118,22 @@ class ChanceNode:
 
 # start
 initialGame = Game(testing = False)
-initialGame.testing = True
-startNode = MaxNode(initialGame, 3)
+for i in range(0,100):
+    initialGame.testing = True
+    startNode = MaxNode(initialGame, 2)
+    initialGame.testing = False
+    print initialGame.state.astype(numpy.uint32)
+    initialGame.move(startNode.action)
+    if startNode.action == 1:
+        print "left"
+    elif startNode.action == 2:
+        print "right"
+    elif startNode.action == 3:
+        print "up"
+    elif startNode.action == 4:
+        print "down"
+    print initialGame.state.astype(numpy.uint32)
+    print "****************************************************************"
 print startNode.action
 print startNode.value
 print startNode.actionList
