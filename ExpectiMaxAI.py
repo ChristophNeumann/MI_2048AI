@@ -3,6 +3,7 @@
 from game import Game, Direction
 import numpy
 import copy
+import time
 
 
 class MaxNode:
@@ -40,8 +41,10 @@ class MaxNode:
     def branch(self):
         for i in xrange(4):
             #Generate Chance Node for all possible moves
-            succ = ChanceNode(self.game, i+1, depth= self.depth)
-            self.successors.append(succ)
+            succGame = copy.deepcopy(self.game)
+            if(succGame.move(i+1)):
+                succ = ChanceNode(succGame, i+1, depth= self.depth)
+                self.successors.append(succ)
 
     def maxNodeTerminalValue(self):
         weightMatrix = numpy.array(
@@ -67,8 +70,7 @@ class ChanceNode:
     def __init__(self, game, direction, depth):
         self.depth = depth
         self.value = 0
-        self.game = copy.deepcopy(game)
-        self.game.move(direction)
+        self.game = game
         self.branchNodes = []
         self.value = self.getChanceNodeValue()
 
