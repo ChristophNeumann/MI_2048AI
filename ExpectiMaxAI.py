@@ -29,11 +29,13 @@ class MaxNode:
         else:
             self.branch()
             possibleValueSuccessors = []
+            directionSuccessors = []
             for chanceNode in self.successors:
                 possibleValueSuccessors.append(chanceNode.value)
+                directionSuccessors.append(chanceNode.direction)
             possibleValueSuccessors = numpy.array(possibleValueSuccessors)
             value = max(possibleValueSuccessors)
-            self.action = numpy.argmax(possibleValueSuccessors) + 1
+            self.action = directionSuccessors[numpy.argmax(possibleValueSuccessors)]
             self.actionList = possibleValueSuccessors
 
         return value
@@ -70,6 +72,7 @@ class ChanceNode:
     def __init__(self, game, direction, depth):
         self.depth = depth
         self.value = 0
+        self.direction = direction
         self.game = game
         self.branchNodes = []
         self.value = self.getChanceNodeValue()
@@ -120,7 +123,9 @@ class ChanceNode:
 
 # start
 initialGame = Game(testing = False)
-for i in range(0,100):
+gameRunning = True
+while gameRunning:
+    gameRunning = not initialGame.over
     initialGame.testing = True
     startNode = MaxNode(initialGame, 2)
     initialGame.testing = False
@@ -136,6 +141,3 @@ for i in range(0,100):
         print "down"
     print initialGame.state.astype(numpy.uint32)
     print "****************************************************************"
-print startNode.action
-print startNode.value
-print startNode.actionList
