@@ -6,10 +6,14 @@ import copy
 
 
 class MaxNode:
-    def __init__(self, game):
+    def __init__(self, game, depth):
         self.game = copy.deepcopy(game)
-        self.value = self.maxNodeTerminalValue()
+        self.depth = depth
+        self.action = 0
         self.successors = []
+        self.actionList = []
+        self.action = 0
+        self.value = self.getValue()
 
 
     def __str__(self):
@@ -18,11 +22,25 @@ class MaxNode:
         printStr += "\nMaxNodeValue: " + str(self.value)
         return printStr
 
+    def getValue(self):
+        if self.depth == 0:
+            value = self.maxNodeTerminalValue()
+        else:
+            self.branch()
+            possibleValueSuccessors = []
+            for chanceNode in self.successors:
+                possibleValueSuccessors.append(chanceNode.value)
+            possibleValueSuccessors = numpy.array(possibleValueSuccessors)
+            value = max(possibleValueSuccessors)
+            self.action = numpy.argmax(possibleValueSuccessors) + 1
+            self.actionList = possibleValueSuccessors
+
+        return value
+
     def branch(self):
-        self.value = self.maxNodeTerminalValue()
-        print self
+        succesorValues=[]
         for i in xrange(4):
-            succ = ChanceNode(self.game, i+1)
+            succ = ChanceNode(self.game, i+1, depth= self.depth)
             self.successors.append(succ)
 
     def maxNodeTerminalValue(self):
@@ -46,12 +64,12 @@ class MaxNode:
 
 
 class ChanceNode:
-    def __init__(self, game, direction):
+    def __init__(self, game, direction, depth):
+        self.depth = depth
         self.value = 0
         self.game = copy.deepcopy(game)
         self.game.move(direction)
         self.branchNodes = []
-        self.branch()
         self.value = self.getChanceNodeValue()
         print self
 
@@ -78,13 +96,14 @@ class ChanceNode:
                 self.branchWeights.append(branchWeight)
                 branchGame.set(cell, value)
 
-                branchedMaxNode = MaxNode(branchGame)
+                branchedMaxNode = MaxNode(branchGame, depth=(self.depth-1))
                 self.branchNodes.append(branchedMaxNode)
 
         self.branchWeights = numpy.array(self.branchWeights)
 
 
     def getChanceNodeValue(self):
+        self.branch()
         branchValues = []
         for node in self.branchNodes:
             branchValues.append(node.value)
@@ -104,6 +123,7 @@ class ChanceNode:
 # start
 initialGame = Game(testing = False)
 initialGame.testing = True
-startNode = MaxNode(initialGame)
-startNode.branch()
-
+startNode = MaxNode(initialGame, 3)
+print startNode.action
+print startNode.value
+print startNode.actionList
