@@ -132,16 +132,18 @@ class ChanceNode:
         printStr += "\nChanceNodeValue:" + str(self.value)
         return printStr
 
-
 # start
 initialGame = Game(testing = False)
 gameRunning = True
 while gameRunning:
     gameRunning = not initialGame.over
     initialGame.testing = True
-    depth = 2
+    depth = 1
 
-    # use more depth if we have a only a few free tiles
+    # use more depth if we have only a few free tiles
+    if len(initialGame.get_available_cells()) < 8:
+        print "using depth=2"
+        depth = 2
     if len(initialGame.get_available_cells()) < 4:
         print "using depth=3"
         depth = 3
