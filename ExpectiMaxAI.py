@@ -172,36 +172,72 @@ class ChanceNode:
         printStr += "\nChanceNodeValue:" + str(self.value)
         return printStr
 
-# start
-initialGame = Game(testing = False)
-gameRunning = True
-while gameRunning:
-    gameRunning = not initialGame.over
-    initialGame.testing = True
-    optimizedDepth = 1
+from enum import Enum
 
-    # use more depth if we have only a few free tiles
-    if len(initialGame.get_available_cells()) < 8:
-        print "using depth=2"
-        optimizedDepth = 2
-    if len(initialGame.get_available_cells()) < 4:
-        print "using depth=3"
-        optimizedDepth = 3
-    elif len(initialGame.get_available_cells()) < 3:
-        print "using depth=4"
-        optimizedDepth = 4
+class Agent:
+    def __init__(self, mode, speed, printMe = True):
+        self.score = 0
+        self.speed = speed
+        self.mode = mode
+        self.gameState = numpy.zeros([5,5])
+        self.printMe = printMe
+        self.startGame()
 
-    startNode = MaxNode(initialGame, optimizedDepth, mode="min")
-    initialGame.testing = False
-    print initialGame.state.astype(numpy.uint32)
-    initialGame.move(startNode.action)
-    if startNode.action == 1:
-        print "left"
-    elif startNode.action == 2:
-        print "right"
-    elif startNode.action == 3:
-        print "up"
-    elif startNode.action == 4:
-        print "down"
-    print initialGame.state.astype(numpy.uint32)
-    print "*********************"
+    def startGame(self):
+    # start
+        startTime = time.clock()
+        initialGame = Game(testing = False)
+        gameRunning = True
+        firstGoalReached = False
+        secondGoalReached = False
+        while gameRunning:
+            gameRunning = not initialGame.over
+            initialGame.testing = True
+            optimizedDepth = 1
+
+            # use more depth if we have only a few free tiles
+            if len(initialGame.get_available_cells()) < 3 :
+                print "using depth=4"
+                optimizedDepth = 4
+            elif len(initialGame.get_available_cells()) < 4:
+                print "using depth=3"
+                optimizedDepth = 3
+            elif len(initialGame.get_available_cells()) < 7 :
+                print "using depth=2"
+                optimizedDepth = 2
+            startNode = MaxNode(initialGame, optimizedDepth, mode=self.mode)
+            initialGame.testing = False
+            initialGame.move(startNode.action)
+            self.gameState = initialGame.state.astype(numpy.uint32)
+            self.score = initialGame.score
+            if self.printMe:
+                self.printGame(startNode.action)
+            if(self.gameState== 2048).any() & (not firstGoalReached):
+                self.printGame(startNode.action)
+                firstGoalReached = True
+                goalTime = time.clock()
+                print "Time elapsed for first goal: "  + str(goalTime - startTime)
+                user_input = raw_input("Reached the goal. Want to continue? y for yes, n for no")
+                if user_input.upper() == "N":
+                    gameRunning = False
+            if(self.gameState==4096).any() & (not secondGoalReached):
+                self.printGame(startNode.action)
+                if user_input.upper() == "N":
+                    gameRunning = False
+                secondGoalReached= True
+                user_input = raw_input("Reached the second goal. Want to continue? ")
+
+    def printGame(self,action):
+        if action == 1:
+            print "left"
+        elif action == 2:
+            print "right"
+        elif action == 3:
+            print "up"
+        elif action == 4:
+            print "down"
+        print self.gameState
+        print "Score : " + str(self.score)
+        print "*********************"
+
+myAgent = Agent("exp", 2, True)
