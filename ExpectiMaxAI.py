@@ -139,7 +139,17 @@ gameRunning = True
 while gameRunning:
     gameRunning = not initialGame.over
     initialGame.testing = True
-    startNode = MaxNode(initialGame, 2)
+    depth = 2
+
+    # use more depth if we have a only a few free tiles
+    if len(initialGame.get_available_cells()) < 4:
+        print "using depth=3"
+        depth = 3
+    elif len(initialGame.get_available_cells()) < 3:
+        print "using depth=4"
+        depth = 4
+
+    startNode = MaxNode(initialGame, depth)
     initialGame.testing = False
     print initialGame.state.astype(numpy.uint32)
     initialGame.move(startNode.action)
