@@ -5,15 +5,52 @@ import numpy
 import copy
 import time
 
+# Min node as Nature move
+class MinNode:
+    def __init__(self, game, direction, depth):
+        self.direction = direction
+        self.game = copy.deepcopy(game)
+        self.depth = depth
+        self.action = 0
+        self.successors = []
+        self.actionList = []
+        self.value = self.getValue()
+
+    def branch(self):
+        availableCells = self.game.get_available_cells()
+        successors = []
+        # for each available cell ...
+        for cell in availableCells:
+            branchGame = copy.deepcopy(self.game)
+            # ... generate two MaxNodes, one with a 2- and the other with a 4-tile
+            for value in [2, 4]:
+                # store weight, so we can later calculate the value of this chance node
+                branchGame.set(cell, value)
+                branchedMaxNode = MaxNode(branchGame, depth= self.depth - 1, mode = "min")
+                successors.append(branchedMaxNode)
+
+        self.successors = successors
+
+    def getValue(self):
+        # generate all chance node successors
+        self.branch()
+        possibleValueSuccessors = []
+        for maxNode in self.successors:
+            possibleValueSuccessors.append(maxNode.value)
+        possibleValueSuccessors = numpy.array(possibleValueSuccessors)
+        value = min(possibleValueSuccessors)
+        return value
+
 # MaxNode represents our turn
 class MaxNode:
-    def __init__(self, game, depth):
+    def __init__(self, game, depth, mode = "exp"):
         self.game = copy.deepcopy(game)
         self.depth = depth
         self.action = 0
         self.successors = []
         self.actionList = []
         self.action = 0
+        self.mode = mode
         self.value = self.getValue()
 
 
@@ -51,7 +88,10 @@ class MaxNode:
 
             # perform the i'st move and only add as successor if move was allowed
             if succGame.move(i+1):
-                succ = ChanceNode(succGame, i+1, depth= self.depth)
+                if self.mode == "exp":
+                    succ = ChanceNode(succGame, i+1, self.depth)
+                else:
+                    succ = MinNode(succGame, (i+1), self.depth)
                 self.successors.append(succ)
 
     # Calculates the value of the current board, this is also called the heuristic
@@ -138,20 +178,20 @@ gameRunning = True
 while gameRunning:
     gameRunning = not initialGame.over
     initialGame.testing = True
-    depth = 1
+    optimizedDepth = 1
 
     # use more depth if we have only a few free tiles
     if len(initialGame.get_available_cells()) < 8:
         print "using depth=2"
-        depth = 2
+        optimizedDepth = 2
     if len(initialGame.get_available_cells()) < 4:
         print "using depth=3"
-        depth = 3
+        optimizedDepth = 3
     elif len(initialGame.get_available_cells()) < 3:
         print "using depth=4"
-        depth = 4
+        optimizedDepth = 4
 
-    startNode = MaxNode(initialGame, depth)
+    startNode = MaxNode(initialGame, optimizedDepth, mode="min")
     initialGame.testing = False
     print initialGame.state.astype(numpy.uint32)
     initialGame.move(startNode.action)
