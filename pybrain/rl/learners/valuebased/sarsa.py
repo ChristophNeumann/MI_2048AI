@@ -43,8 +43,8 @@ class SARSA(ValueBasedLearner):
                     self.lastreward = reward
                     continue
 
-                qvalue = self.module.getValue(self.laststate, self.lastaction)
-                qnext = self.module.getValue(state, action)
+                qvalue = self.module.getValue
+                qnext = self.module.getValue
                 self.module.updateValue(self.laststate, self.lastaction, qvalue + self.alpha * (self.lastreward + self.gamma * qnext - qvalue))
 
                 # move state to oldstate

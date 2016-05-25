@@ -30,7 +30,7 @@ class NFQ(ValueBasedLearner):
                 # use experience from last timestep to do Q update
                 (state_, action_, reward_) = lastexperience
 
-                Q = self.module.getValue(state_, action_[0])
+                Q = self.module.getValue
 
                 inp = r_[state_, one_to_n(action_[0], self.module.numActions)]
                 tgt = Q + 0.5*(reward_ + self.gamma * max(self.module.getActionValues(state)) - Q)

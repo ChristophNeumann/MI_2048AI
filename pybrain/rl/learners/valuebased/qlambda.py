@@ -37,6 +37,6 @@ class QLambda(ValueBasedLearner):
             lastaction = int(actions[i - 1])
             lastreward = int(rewards[i - 1])
 
-            qvalue = self.module.getValue(laststate, lastaction)
-            maxnext = self.module.getValue(state, self.module.getMaxAction(state))
+            qvalue = self.module.getValue
+            maxnext = self.module.getValue
             self.module.updateValue(laststate, lastaction, qvalue + self.alpha * lbda * (lastreward + self.gamma * maxnext - qvalue))

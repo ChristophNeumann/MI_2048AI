@@ -47,8 +47,8 @@ class Q(ValueBasedLearner):
                     self.lastreward = reward
                     continue
 
-                qvalue = self.module.getValue(self.laststate, self.lastaction)
-                maxnext = self.module.getValue(state, self.module.getMaxAction(state))
+                qvalue = self.module.getValue
+                maxnext = self.module.getValue
                 self.module.updateValue(self.laststate, self.lastaction, qvalue + self.alpha * (self.lastreward + self.gamma * maxnext - qvalue))
 
                 # move state to oldstate

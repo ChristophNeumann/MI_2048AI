@@ -49,6 +49,7 @@ class MinNode:
         for maxNode in self.successors:
             possibleValueSuccessors.append(maxNode.value)
             self.beta = min(self.beta,maxNode)
+
         possibleValueSuccessors = numpy.array(possibleValueSuccessors)
         value = min(possibleValueSuccessors)
         return value
@@ -66,7 +67,6 @@ class MaxNode:
         self.mode = mode
         self.alpha = float("-infinity")
         self.value = self.getValue()
-
 
     # Easy "print maxNode" functionality
     def __str__(self):
@@ -88,10 +88,15 @@ class MaxNode:
             for chanceNode in self.successors:
                 possibleValueSuccessors.append(chanceNode.value)
                 directionSuccessors.append(chanceNode.direction)
-            possibleValueSuccessors = numpy.array(possibleValueSuccessors)
-            value = max(possibleValueSuccessors)
-            self.action = directionSuccessors[numpy.argmax(possibleValueSuccessors)]
-            self.actionList = possibleValueSuccessors
+            #Check if branching was possible at this node
+            if possibleValueSuccessors:
+                possibleValueSuccessors = numpy.array(possibleValueSuccessors)
+                value = max(possibleValueSuccessors)
+                self.action = directionSuccessors[numpy.argmax(possibleValueSuccessors)]
+                self.actionList = possibleValueSuccessors
+            #If branching was infeasible, return infinity as value
+            else:
+                value = float("-infinity")
         return value
 
 
@@ -104,6 +109,7 @@ class MaxNode:
                 if self.mode == "exp":
                     succ = ChanceNode(succGame, i+1, self.depth)
                     self.successors.append(succ)
+                # Ensure that parent is unable to enforce a better outcome. If false, no more need for creating children
                 elif self.alpha <= self.parentBeta:
                     succ = MinNode(succGame, (i+1), self.depth, parentAlpha=self.alpha)
                     self.alpha = max(self.alpha, succ.value)
