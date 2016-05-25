@@ -233,22 +233,33 @@ class Agent:
             boardHeuristicScore = startNode.value;
             initialGame.testing = False
             initialGame.move(startNode.action)
-            self.gameState = initialGame.state.astype(numpy.uint32)
-            self.score = initialGame.score
-            if self.printMe:
-                print "Depth = " + str(optimizedDepth)
-                self.printGame(startNode.action)
-            if(self.gameState == 2048).any() & (not firstGoalReached):
-                firstGoalReached = True
-                goalTime = time.clock()
-                print "Time elapsed to reach 2048: "  + str(goalTime - startTime)
+
+            # check if the AI lost the game
+            if initialGame.over:
+                print "Time elapsed until failure: "  + str(currentTime - startTime)
                 gameRunning = False
+            else:
+                currentTime = time.clock()
+                self.gameState = initialGame.state.astype(numpy.uint32)
+                self.score = initialGame.score
+                
+                # print game board at each move
+                if self.printMe:
+                    print "Depth = " + str(optimizedDepth)
+                    self.printGame(startNode.action)
+                
+                # check if AI has won the game
+                if (self.gameState == 2048).any() & (not firstGoalReached):
+                    firstGoalReached = True
+                    
+                    print "Time elapsed to reach 2048: "  + str(currentTime - startTime)
+                    gameRunning = False
 
         print "game is over. "
         print "board heuristic score: " + str(boardHeuristicScore)
         self.printGame(5)
 
-    def printGame(self,action):
+    def printGame(self, action):
         if action == 1:
             print "left"
         elif action == 2:
@@ -257,7 +268,7 @@ class Agent:
             print "up"
         elif action == 4:
             print "down"
-        #print self.gameState
+        print self.gameState
         print "Score : " + str(self.score)
         print "*********************"
 
