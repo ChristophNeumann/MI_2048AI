@@ -4,6 +4,7 @@ from game import Game, Direction
 import numpy
 import copy
 import time
+import os
 
 # Min node as Nature move
 class MinNode:
@@ -216,6 +217,10 @@ class Agent:
         secondGoalReached = False
         boardHeuristicScore = 0
 
+        # measurements
+        target = 128
+        measuredTimes = []
+
         while gameRunning:
             gameRunning = not initialGame.over
             initialGame.testing = True
@@ -233,27 +238,35 @@ class Agent:
             boardHeuristicScore = startNode.value;
             initialGame.testing = False
             initialGame.move(startNode.action)
+            elapsedTime = time.clock() - startTime
 
-            # check if the AI lost the game
-            if initialGame.over:
-                print "Time elapsed until failure: "  + str(currentTime - startTime)
+            self.gameState = initialGame.state.astype(numpy.uint32)
+            self.score = initialGame.score
+
+            # check if the AI lost the game or we reached our maximum tile we want to achive
+            if initialGame.over or target > 16384:
+                print "Game ended after : "  + str(elapsedTime) + "seconds"
                 gameRunning = False
+
+                # log final heuristic score and times to csv file
+                with open("benchmark.csv", "a") as file:
+                    benchmarkString = str(self.score) + ", " + str(boardHeuristicScore) + ", " + ", ".join([str(i) for i in measuredTimes]) + os.linesep
+                    print benchmarkString
+                    file.write(benchmarkString)
+
             else:
-                currentTime = time.clock()
-                self.gameState = initialGame.state.astype(numpy.uint32)
-                self.score = initialGame.score
-                
                 # print game board at each move
                 if self.printMe:
                     print "Depth = " + str(optimizedDepth)
                     self.printGame(startNode.action)
                 
-                # check if AI has won the game
-                if (self.gameState == 2048).any() & (not firstGoalReached):
-                    firstGoalReached = True
-                    
-                    print "Time elapsed to reach 2048: "  + str(currentTime - startTime)
-                    gameRunning = False
+                # check if AI has reached a target
+                if (self.gameState == target).any():
+                    print "Time elapsed to reach " + str(target) + ": " + str(elapsedTime)
+
+                    # set next target
+                    target = target * 2;
+                    measuredTimes.append(elapsedTime);
 
         print "game is over. "
         print "board heuristic score: " + str(boardHeuristicScore)
