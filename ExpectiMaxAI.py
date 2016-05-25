@@ -7,28 +7,39 @@ import time
 
 # Min node as Nature move
 class MinNode:
-    def __init__(self, game, direction, depth):
+    def __init__(self, game, direction, depth, parentAlpha = float("-infinity")):
         self.direction = direction
+        self.parentAlpha = parentAlpha
         self.game = copy.deepcopy(game)
         self.depth = depth
         self.action = 0
         self.successors = []
         self.actionList = []
+        self.beta = float("infinity")
         self.value = self.getValue()
 
     def branch(self):
         availableCells = self.game.get_available_cells()
         successors = []
+        prune = False
         # for each available cell ...
         for cell in availableCells:
             branchGame = copy.deepcopy(self.game)
             # ... generate two MaxNodes, one with a 2- and the other with a 4-tile
             for value in [2, 4]:
-                # store weight, so we can later calculate the value of this chance node
-                branchGame.set(cell, value)
-                branchedMaxNode = MaxNode(branchGame, depth= self.depth - 1, mode = "min")
-                successors.append(branchedMaxNode)
-
+                # store weight, so we can later calculate the value of this min node
+                #Check if parent can't enforce a better outcome
+                if self.parentAlpha <= self.beta:
+                    branchGame.set(cell, value)
+                    branchedMaxNode = MaxNode(branchGame, depth= self.depth - 1, mode = "min", parentBeta= self.beta)
+                    self.beta = min(self.beta, branchedMaxNode.value)
+                    successors.append(branchedMaxNode)
+                #Parent can enforce a better outcome. No more need to check the for loop or to create successors
+                else:
+                    prune = True
+                    break
+            if prune:
+                break
         self.successors = successors
 
     def getValue(self):
@@ -37,20 +48,23 @@ class MinNode:
         possibleValueSuccessors = []
         for maxNode in self.successors:
             possibleValueSuccessors.append(maxNode.value)
+            self.beta = min(self.beta,maxNode)
         possibleValueSuccessors = numpy.array(possibleValueSuccessors)
         value = min(possibleValueSuccessors)
         return value
 
 # MaxNode represents our turn
 class MaxNode:
-    def __init__(self, game, depth, mode = "exp"):
+    def __init__(self, game, depth, mode = "exp", parentBeta = float("infinity")):
         self.game = copy.deepcopy(game)
+        self.parentBeta = parentBeta
         self.depth = depth
         self.action = 0
         self.successors = []
         self.actionList = []
         self.action = 0
         self.mode = mode
+        self.alpha = float("-infinity")
         self.value = self.getValue()
 
 
@@ -85,14 +99,19 @@ class MaxNode:
     def branch(self):
         for i in xrange(4):
             succGame = copy.deepcopy(self.game)
-
             # perform the i'st move and only add as successor if move was allowed
             if succGame.move(i+1):
                 if self.mode == "exp":
                     succ = ChanceNode(succGame, i+1, self.depth)
+                    self.successors.append(succ)
+                elif self.alpha <= self.parentBeta:
+                    succ = MinNode(succGame, (i+1), self.depth, parentAlpha=self.alpha)
+                    self.alpha = max(self.alpha, succ.value)
+                    self.successors.append(succ)
+                #No more evaluation necessary. Prune this node
                 else:
-                    succ = MinNode(succGame, (i+1), self.depth)
-                self.successors.append(succ)
+                    break
+
 
     # Calculates the value of the current board, this is also called the heuristic
     def maxNodeTerminalValue(self):
