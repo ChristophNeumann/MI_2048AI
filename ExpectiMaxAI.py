@@ -235,7 +235,6 @@ class Agent:
                 print "Depth = " + str(optimizedDepth)
                 self.printGame(startNode.action)
             if(self.gameState== 2048).any() & (not firstGoalReached):
-                self.printGame(startNode.action)
                 firstGoalReached = True
                 goalTime = time.clock()
                 print "Time elapsed for first goal: "  + str(goalTime - startTime)
