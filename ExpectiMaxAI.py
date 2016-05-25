@@ -175,15 +175,14 @@ class ChanceNode:
 from enum import Enum
 
 class Agent:
-    def __init__(self, mode, speed, printMe = True):
+    def __init__(self, mode, printMe = True):
         self.score = 0
-        self.speed = speed
         self.mode = mode
         self.gameState = numpy.zeros([5,5])
         self.printMe = printMe
-        self.startGame()
+        self.playGame()
 
-    def startGame(self):
+    def playGame(self):
     # start
         startTime = time.clock()
         initialGame = Game(testing = False)
@@ -240,4 +239,4 @@ class Agent:
         print "Score : " + str(self.score)
         print "*********************"
 
-myAgent = Agent("exp", 2, True)
+myAgent = Agent("min", True)
