@@ -251,6 +251,9 @@ class Agent:
                 secondGoalReached= True
                 user_input = raw_input("Reached the second goal. Want to continue? ")
 
+        print "game is over. "
+        self.printGame(5)
+
     def printGame(self,action):
         if action == 1:
             print "left"
