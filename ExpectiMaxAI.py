@@ -229,6 +229,8 @@ class Agent:
             elif len(initialGame.get_available_cells()) < 7 :
                 print "using depth=2"
                 optimizedDepth = 2
+            if self.mode == "min":
+                optimizedDepth = optimizedDepth+1
             startNode = MaxNode(initialGame, optimizedDepth, mode=self.mode)
             initialGame.testing = False
             initialGame.move(startNode.action)
