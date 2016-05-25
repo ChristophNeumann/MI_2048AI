@@ -214,6 +214,8 @@ class Agent:
         gameRunning = True
         firstGoalReached = False
         secondGoalReached = False
+        boardHeuristicScore = 0
+
         while gameRunning:
             gameRunning = not initialGame.over
             initialGame.testing = True
@@ -226,7 +228,9 @@ class Agent:
                 optimizedDepth = 3
             elif len(initialGame.get_available_cells()) < 7 :
                 optimizedDepth = 2
+
             startNode = MaxNode(initialGame, optimizedDepth, mode=self.mode)
+            boardHeuristicScore = startNode.value;
             initialGame.testing = False
             initialGame.move(startNode.action)
             self.gameState = initialGame.state.astype(numpy.uint32)
@@ -234,13 +238,14 @@ class Agent:
             if self.printMe:
                 print "Depth = " + str(optimizedDepth)
                 self.printGame(startNode.action)
-            if(self.gameState== 2048).any() & (not firstGoalReached):
+            if(self.gameState == 2048).any() & (not firstGoalReached):
                 firstGoalReached = True
                 goalTime = time.clock()
-                print "Time elapsed for first goal: "  + str(goalTime - startTime)
+                print "Time elapsed to reach 2048: "  + str(goalTime - startTime)
                 gameRunning = False
 
         print "game is over. "
+        print "board heuristic score: " + str(boardHeuristicScore)
         self.printGame(5)
 
     def printGame(self,action):
@@ -252,7 +257,7 @@ class Agent:
             print "up"
         elif action == 4:
             print "down"
-        print self.gameState
+        #print self.gameState
         print "Score : " + str(self.score)
         print "*********************"
 
