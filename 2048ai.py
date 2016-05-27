@@ -1,9 +1,11 @@
 # 2048 5x5 ExpectiMaxi AI
+# Usage: "python 2048ai.py min" or "python 2048ai.py exp"
 
 from game import Game, Direction
 import numpy
 import copy
 import time
+import sys
 import os
 
 # Min node as Nature move
@@ -218,7 +220,7 @@ class Agent:
         boardHeuristicScore = 0
 
         # measurements
-        target = 128
+        target = 2048
         measuredTimes = []
 
         while gameRunning:
@@ -244,7 +246,7 @@ class Agent:
             self.score = initialGame.score
 
             # check if the AI lost the game or we reached our maximum tile we want to achive
-            if initialGame.over or target > 16384:
+            if initialGame.over or target > 2048:
                 print "Game ended after : "  + str(elapsedTime) + "seconds"
                 gameRunning = False
 
@@ -285,4 +287,11 @@ class Agent:
         print "Score : " + str(self.score)
         print "*********************"
 
-myAgent = Agent("min", False)
+# read either exp or min from command line arguments
+mode = "exp"
+if sys.argv[1] == "min":
+    mode = "min"
+
+print "Performing AI in " + mode + " mode."
+myAgent = Agent(mode, True)
+
