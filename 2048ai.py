@@ -200,8 +200,6 @@ class ChanceNode:
         printStr += "\nChanceNodeValue:" + str(self.value)
         return printStr
 
-from enum import Enum
-
 class Agent:
     def __init__(self, mode, printMe = True):
         self.score = 0
